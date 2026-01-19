@@ -13,7 +13,8 @@
     <div class="container">
         <div class="header">
             <h1>🎯 أداة تسجيل الحضور والغياب</h1>
-            <p>نظام سريع وسهل لتسجيل حضور العمال</p>
+            <p>نظام سريع وسهل لتسجيل حضور العمال <a href="landing.html"
+                    style="color: white; text-decoration: underline; font-weight: bold;">← عرض الميزات</a></p>
         </div>
 
         <div class="content">
@@ -82,11 +83,8 @@
                         style="background: #ff6b6b; color: white; display: none;" onclick="toggleContinuousVoice()">
                         🎤 تشغيل البحث المستمر
                     </button>
-                    <button class="quick-btn" style="background: #6c757d; color: white;" onclick="printReport()">
-                        🖨️ طباعة
-                    </button>
-                    <button class="quick-btn" style="background: #28a745; color: white;" onclick="exportToCSV()">
-                        📊 تصدير CSV
+                    <button class="quick-btn" style="background: #9b59b6; color: white;" onclick="toggleMusicPlayer()">
+                        🎵 الموسيقى
                     </button>
                 </div>
 
@@ -155,6 +153,38 @@
     <button class="undo-btn no-print" id="undoBtn" onclick="undoLastAction()">
         ↶ تراجع
     </button>
+
+    <!-- Music Player -->
+    <div class="music-player no-print" id="musicPlayer">
+        <div class="music-player-header">
+            <h3>🎵 مشغل الموسيقى الهادئة</h3>
+            <button class="close-player" onclick="toggleMusicPlayer()">✕</button>
+        </div>
+        <div class="music-player-content">
+            <div class="playlist-selector">
+                <label>اختر الموسيقى:</label>
+                <select id="musicSelect" onchange="changeMusic()">
+                    <option value="">-- بدون موسيقى --</option>
+                    <option value="1">🌊 موجات المحيط الهادئة</option>
+                    <option value="2">🌧️ صوت المطر المهدئ</option>
+                    <option value="3">🌿 أصوات الغابة والطيور</option>
+                    <option value="4">🎹 بيانو كلاسيكي هادئ</option>
+                    <option value="5">🧘 موسيقى التأمل والاسترخاء</option>
+                    <option value="6">☕ موسيقى الكافيه الهادئة</option>
+                </select>
+            </div>
+            <div class="music-controls">
+                <button class="music-btn" id="playPauseBtn" onclick="togglePlayPause()">▶️ تشغيل</button>
+                <input type="range" id="volumeSlider" min="0" max="100" value="50" onchange="setVolume()"
+                    class="volume-slider">
+                <span id="volumeValue">50%</span>
+            </div>
+            <div class="music-status" id="musicStatus">اختر موسيقى للبدء</div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" style="display: none;"></audio>
+
     <footer id="site-footer">
         <div class="footer-content">
             <p>&copy; 2026 Salah Mortaja - أداة تسجيل الحضور والغياب</p>

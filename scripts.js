@@ -12,6 +12,123 @@ let maxHistorySize = 20;
 let continuousVoiceMode = false;
 let voicePermissionGranted = false;
 
+// متغيرات الموسيقى
+let isPlaying = false;
+let currentMusicTrack = null;
+const musicTracks = {
+  1: {
+    name: "موجات المحيط الهادئة",
+    url: "https://assets.mixkit.co/active_storage/sfx/2338/2338-preview.mp3",
+  },
+  2: {
+    name: "صوت المطر المهدئ",
+    url: "https://assets.mixkit.co/active_storage/sfx/2341/2341-preview.mp3",
+  },
+  3: {
+    name: "أصوات الغابة والطيور",
+    url: "https://assets.mixkit.co/active_storage/sfx/2340/2340-preview.mp3",
+  },
+  4: {
+    name: "بيانو كلاسيكي هادئ",
+    url: "https://assets.mixkit.co/active_storage/music/27/27-preview.mp3",
+  },
+  5: {
+    name: "موسيقى التأمل والاسترخاء",
+    url: "https://assets.mixkit.co/active_storage/music/28/28-preview.mp3",
+  },
+  6: {
+    name: "موسيقى الكافيه الهادئة",
+    url: "https://assets.mixkit.co/active_storage/music/29/29-preview.mp3",
+  },
+};
+
+// وظائف مشغل الموسيقى
+function toggleMusicPlayer() {
+  const player = document.getElementById("musicPlayer");
+  if (player.style.display === "none" || player.style.display === "") {
+    player.style.display = "block";
+  } else {
+    player.style.display = "none";
+    stopMusic();
+  }
+}
+
+function changeMusic() {
+  const select = document.getElementById("musicSelect");
+  const trackId = select.value;
+
+  if (!trackId) {
+    stopMusic();
+    return;
+  }
+
+  const audio = document.getElementById("audioPlayer");
+  const track = musicTracks[trackId];
+
+  if (track) {
+    audio.src = track.url;
+    currentMusicTrack = trackId;
+    audio.loop = true;
+    updateMusicStatus(`تم اختيار: ${track.name}`);
+    playMusic();
+  }
+}
+
+function playMusic() {
+  const audio = document.getElementById("audioPlayer");
+  if (audio.src) {
+    audio
+      .play()
+      .then(() => {
+        isPlaying = true;
+        document.getElementById("playPauseBtn").textContent = "⏸️ إيقاف";
+        updateMusicStatus("🎵 موسيقى قيد التشغيل...");
+      })
+      .catch((err) => {
+        updateMusicStatus("❌ لم يتمكن من تشغيل الموسيقى");
+      });
+  }
+}
+
+function stopMusic() {
+  const audio = document.getElementById("audioPlayer");
+  audio.pause();
+  audio.currentTime = 0;
+  isPlaying = false;
+  document.getElementById("playPauseBtn").textContent = "▶️ تشغيل";
+  document.getElementById("musicSelect").value = "";
+  updateMusicStatus("اختر موسيقى للبدء");
+}
+
+function togglePlayPause() {
+  const select = document.getElementById("musicSelect");
+  if (!select.value) {
+    updateMusicStatus("⚠️ اختر موسيقى أولاً");
+    return;
+  }
+
+  if (isPlaying) {
+    document.getElementById("audioPlayer").pause();
+    isPlaying = false;
+    document.getElementById("playPauseBtn").textContent = "▶️ تشغيل";
+    updateMusicStatus("⏸️ موسيقى معلقة");
+  } else {
+    playMusic();
+  }
+}
+
+function setVolume() {
+  const slider = document.getElementById("volumeSlider");
+  const audio = document.getElementById("audioPlayer");
+  const volume = slider.value / 100;
+  audio.volume = volume;
+  document.getElementById("volumeValue").textContent = slider.value + "%";
+}
+
+function updateMusicStatus(message) {
+  document.getElementById("musicStatus").textContent = message;
+}
+
 function toggleContinuousVoice() {
   continuousVoiceMode = !continuousVoiceMode;
   const btn = document.getElementById("continuousVoiceBtn");
@@ -601,3 +718,12 @@ document
       loadEmployees();
     }
   });
+
+// تهيئة مشغل الموسيقى
+document.addEventListener("DOMContentLoaded", function () {
+  const player = document.getElementById("musicPlayer");
+  if (player) {
+    player.style.display = "none";
+  }
+  setVolume();
+});
