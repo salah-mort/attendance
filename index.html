@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة تسجيل الحضور والغياب</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 أداة تسجيل الحضور والغياب</h1>
+            <p>نظام سريع وسهل لتسجيل حضور العمال</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section">
+                <h2 style="margin-bottom: 20px;">📁 تحميل الملفات</h2>
+
+                <div class="file-input-wrapper">
+                    <input type="file" id="excelFile" accept=".xlsx,.xls">
+                    <label for="excelFile">📊 اختر ملف الإكسل</label>
+                </div>
+
+                <div class="date-input">
+                    <label style="display: block; margin-bottom: 10px; font-weight: bold;">📅 التاريخ:</label>
+                    <input type="date" id="attendanceDate">
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <label
+                        style="display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="startWithAbsent" checked
+                            style="width: 20px; height: 20px; cursor: pointer;">
+                        <span style="font-weight: bold; font-size: 1.1em;">ابدأ بجعل الجميع غائبين (انقر على الاسم ليصبح
+                            حاضر)</span>
+                    </label>
+                </div>
+
+                <div id="fileInfo" style="margin-top: 15px;"></div>
+            </div>
+
+            <div id="statsSection" style="display: none;">
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalCount">0</div>
+                        <div class="stat-label">إجمالي العمال</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="presentCount" style="color: #28a745;">0</div>
+                        <div class="stat-label">حاضر</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="absentCount" style="color: #dc3545;">0</div>
+                        <div class="stat-label">غائب</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="unmarkedCount" style="color: #ffc107;">0</div>
+                        <div class="stat-label">غير محدد</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="quickActionsSection" style="display: none;">
+                <div class="quick-actions">
+                    <button class="quick-btn all-absent-btn" onclick="markAllAbsent()">
+                        ❌ الجميع غائب
+                    </button>
+                    <button class="quick-btn all-present-btn" onclick="markAllPresent()">
+                        ✅ الجميع حاضر
+                    </button>
+                    <button class="quick-btn clear-all-btn" onclick="clearAll()">
+                        🔄 مسح الكل
+                    </button>
+                    <button class="quick-btn" style="background: #17a2b8; color: white;" onclick="toggleBulkMode()">
+                        📦 وضع الاختيار المتعدد
+                    </button>
+                    <button class="quick-btn" id="continuousVoiceBtn"
+                        style="background: #ff6b6b; color: white; display: none;" onclick="toggleContinuousVoice()">
+                        🎤 تشغيل البحث المستمر
+                    </button>
+                    <button class="quick-btn" style="background: #6c757d; color: white;" onclick="printReport()">
+                        🖨️ طباعة
+                    </button>
+                    <button class="quick-btn" style="background: #28a745; color: white;" onclick="exportToCSV()">
+                        📊 تصدير CSV
+                    </button>
+                </div>
+
+                <div class="filter-buttons">
+                    <button class="filter-btn active" onclick="filterEmployees('all')">الكل</button>
+                    <button class="filter-btn" onclick="filterEmployees('present')">الحاضرين فقط</button>
+                    <button class="filter-btn" onclick="filterEmployees('absent')">الغائبين فقط</button>
+                    <button class="filter-btn" onclick="filterEmployees('unmarked')">غير محدد</button>
+                </div>
+
+                <div class="shortcuts-panel" id="shortcutsPanel" style="display: none;">
+                    <h3 style="margin-bottom: 10px; color: #667eea;">⌨️ اختصارات لوحة المفاتيح</h3>
+                    <div class="shortcuts-grid">
+                        <div class="shortcut-item">
+                            <span class="shortcut-key">Ctrl + S</span> حفظ
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="shortcut-key">Ctrl + F</span> بحث
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="shortcut-key">Ctrl + Z</span> تراجع
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="shortcut-key">Ctrl + P</span> طباعة
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="shortcut-key">Ctrl + A</span> الجميع حاضر
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="shortcut-key">Ctrl + D</span> الجميع غائب
+                        </div>
+                        <div class="shortcut-item">
+                            <span class="shortcut-key">?</span> إظهار/إخفاء الاختصارات
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="searchSection" style="display: none;">
+                <div
+                    style="background: #d1ecf1; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 0.9em; color: #0c5460;">
+                    💡 <strong>نصيحة:</strong> عند أول استخدام للميكروفون، اضغط "السماح" ليعمل البحث الصوتي بدون طلب
+                    الإذن مجدداً
+                </div>
+                <div class="search-box" style="margin: 0 auto;">
+                    <input type="text" id="searchInput" placeholder="🔍 ابحث عن اسم العامل...">
+                    <button class="voice-btn" id="voiceBtn" onclick="startVoiceSearch()" title="البحث الصوتي">
+                        🎤
+                    </button>
+                </div>
+                <div id="voiceStatus" style="text-align: center; margin-top: 10px; color: #666; font-weight: bold;">
+                </div>
+            </div>
+
+            <div id="employeeSection" style="display: none;">
+                <div class="employee-grid" id="employeeGrid"></div>
+
+                <div class="action-buttons">
+                    <button class="action-btn save-btn" onclick="saveAttendance()">💾 حفظ التعديلات</button>
+                    <button class="action-btn reset-btn" onclick="resetAll()">🔄 إعادة تعيين</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="undo-btn no-print" id="undoBtn" onclick="undoLastAction()">
+        ↶ تراجع
+    </button>
+    <footer id="site-footer">
+        <div class="footer-content">
+            <p>&copy; 2026 Salah Mortaja - أداة تسجيل الحضور والغياب</p>
+            <a href="https://linktr.ee/salah.mort" target="_blank" rel="noopener noreferrer">🔗 تواصل معي</a>
+        </div>
+    </footer>
+    <!-- Link the JavaScript file here -->
+    <script src="scripts.js"></script>
+</body>
+
+</html>
